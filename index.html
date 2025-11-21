@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title">Mixxx a Rekordbox - Exportador de Playlists</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .disclaimer {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.85em;
+            color: #856404;
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .disclaimer strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 data-i18n="headerTitle">Mixxx a Rekordbox</h1>
+            <p class="subtitle" data-i18n="subtitle">Exportador de Playlists y Biblioteca</p>
+            <p style="margin-top: 10px;">
+                <a href="help.html" id="helpLink" style="color: #bacde1; text-decoration: none; font-size: 0.9em;">
+                    Ver ayuda y documentación
+                </a>
+            </p>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2 data-i18n="configuration">Configuración</h2>
+                
+                <div class="form-group">
+                    <label for="language" data-i18n="languageLabel">Idioma / Language:</label>
+                    <select id="language" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em; background: #f8f9fa; color: #2c3e50;">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dbFile" data-i18n="dbFileLabel">Base de datos de Mixxx:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label for="dbFile" class="file-button" id="fileButtonLabel" data-i18n="browseButton">Examinar...</label>
+                        <input type="file" id="dbFile" accept=".sqlite,.db" style="display: none;" />
+                        <span id="fileName" style="flex: 1; color: #6c757d; font-style: italic;"></span>
+                    </div>
+                    <small data-i18n="dbFileHelp">Selecciona el archivo mixxxdb.sqlite</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="oldBase" data-i18n="oldBaseLabel">Path base original (Linux):</label>
+                    <input type="text" id="oldBase" data-i18n-placeholder="oldBaseLabel" placeholder="/home/user/Music/electronic" />
+                    <small data-i18n="oldBaseHelp">Ruta donde están los archivos actualmente en Linux</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="newBase" data-i18n="newBaseLabel">Path base destino (Windows):</label>
+                    <input type="text" id="newBase" data-i18n-placeholder="newBaseLabel" placeholder="/D:/electronic" />
+                    <small data-i18n="newBaseHelp">Ruta donde estarán los archivos en Windows</small>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="includePlaylists" checked />
+                        <span data-i18n="includePlaylists">Incluir listas de reproducción (playlist)</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="includeCrates" checked />
+                        <span data-i18n="includeCrates">Incluir cajones (crates)</span>
+                    </label>
+                </div>
+
+                <button id="processBtn" class="btn-primary" disabled data-i18n="processButton">Procesar y Generar XML</button>
+            </div>
+
+            <div id="status" class="status hidden"></div>
+            <div id="progress" class="progress hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="progressText">0%</span>
+            </div>
+
+            <div class="disclaimer" data-i18n="disclaimer">
+                <strong>Disclaimer:</strong> Aunque este programa accede en modo solo lectura a la base de datos de Mixxx, 
+                no se responsabiliza de ninguna forma por pérdida de datos o cualquier otro inconveniente relacionado con 
+                Mixxx, Rekordbox, archivos de audio o cualquier otro problema que pueda surgir. El uso de este software es 
+                bajo su propia responsabilidad.
+            </div>
+        </main>
+
+        <footer>
+            <p data-i18n="footer">Convierte tu biblioteca de Mixxx a formato Rekordbox</p>
+            <p style="margin-top: 10px; font-size: 0.85em; color: #6c757d;">
+                <span data-i18n="author">Autor: Leo Combes</span> | 
+                <a href="LICENSE" style="color: #6c757d; text-decoration: none;" data-i18n="license">GPL-3.0</a> | 
+                <span data-i18n="inspiredBy">Inspirado en:</span> 
+                <a href="https://github.com/FrankwaP/mixxx-utils" target="_blank" style="color: #6c757d; text-decoration: none;">mixxx-utils</a>, 
+                <a href="https://github.com/TheKantankerus/MixxxToRekordbox" target="_blank" style="color: #6c757d; text-decoration: none;">MixxxToRekordbox</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- sql.js desde archivo local -->
+    <script src="sql-wasm.js"></script>
+    <!-- protobuf.js para procesar beats -->
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js"></script>
+    <!-- Sistema de traducción -->
+    <script src="i18n.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - Mixxx to Rekordbox</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .help-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .help-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+        }
+        .help-section h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .help-section h3 {
+            color: #34495e;
+            margin-top: 20px;
+        }
+        .help-section h4 {
+            color: #34495e;
+            margin-top: 15px;
+        }
+        .help-section p {
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        .help-section ul, .help-section ol {
+            line-height: 1.8;
+            color: #2c3e50;
+            padding-left: 30px;
+        }
+        .help-section li {
+            margin-bottom: 10px;
+        }
+        .help-section code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #856404;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .warning-box strong {
+            color: #856404;
+        }
+        .warning-box ul {
+            color: #856404;
+            margin-top: 10px;
+        }
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #0c5460;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .info-box strong {
+            color: #0c5460;
+        }
+        .info-box em {
+            color: #0c5460;
+        }
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+            color: #2c3e50;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .code-example strong {
+            color: #3498db;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+        }
+        .disclaimer {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.85em;
+            color: #856404;
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .disclaimer strong {
+            color: #856404;
+        }
+        .language-switch {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .language-switch a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 10px;
+        }
+        .language-switch a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Help - Mixxx to Rekordbox</h1>
+            <p class="subtitle">Usage guide and documentation</p>
+            <div class="language-switch">
+                <a href="help.html">Español</a> | <a href="help_en.html">English</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="help-container">
+                <a href="index.html" class="back-link">← Back to application</a>
+
+                <!-- Disclaimer -->
+                <div class="disclaimer">
+                    <strong>Disclaimer:</strong> Although this program accesses the Mixxx database in read-only mode, it is not responsible in any way for data loss or any other inconvenience related to Mixxx, Rekordbox, audio files or any other problem that may arise. The use of this software is at your own risk.
+                </div>
+
+                <!-- Introduction -->
+                <div class="help-section">
+                    <h2>What is this system?</h2>
+                    <p>
+                        This system is a <strong>bridge between Mixxx and Rekordbox</strong>, designed to facilitate 
+                        the transfer of playlists and musical organization between these two platforms.
+                    </p>
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> This program <strong>does NOT replace Rekordbox</strong>. 
+                        It is a complementary tool that allows you to automatically import your organizational 
+                        structures from Mixxx to Rekordbox through an XML file.
+                    </div>
+                </div>
+
+                <!-- How Rekordbox works -->
+                <div class="help-section">
+                    <h2>How does Rekordbox work with USB drives?</h2>
+                    <p>
+                        Rekordbox is Pioneer DJ's music management software that allows you to prepare and organize 
+                        your music for use on compatible equipment such as the CDJ-3000.
+                    </p>
+                    <h3>USB export process:</h3>
+                    <ol>
+                        <li>
+                            <strong>Playlist export:</strong> Rekordbox exports the playlists you have loaded to a USB drive.
+                        </li>
+                        <li>
+                            <strong>Audio file copy:</strong> During export, Rekordbox copies the audio files 
+                            (MP3, FLAC, etc.) to the USB drive.
+                        </li>
+                        <li>
+                            <strong>Metadata generation:</strong> Rekordbox analyzes each track and generates:
+                            <ul>
+                                <li>Visual waveforms</li>
+                                <li>Cue and loop information</li>
+                                <li>BPM and tempo analysis</li>
+                                <li>Musical key information</li>
+                                <li>Other metadata needed for compatible players</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Proprietary format:</strong> All this information is stored in a proprietary 
+                            format that only Rekordbox can generate and that Pioneer equipment can read.
+                        </li>
+                    </ol>
+                    <div class="info-box">
+                        <strong>💡 Note:</strong> For Rekordbox to analyze and generate all this information, 
+                        you need to have the music previously loaded and analyzed in Rekordbox, along with manually 
+                        created playlists.
+                    </div>
+                </div>
+
+                <!-- The problem it solves -->
+                <div class="help-section">
+                    <h2>What problem does this program solve?</h2>
+                    <p>
+                        If you already have your music organized in <strong>Mixxx</strong> with playlists 
+                        and/or crates, creating a Rekordbox-compatible USB drive traditionally requires:
+                    </p>
+                    <ol>
+                        <li>Having the music accessible in Rekordbox</li>
+                        <li>
+                            <strong>Manually creating</strong> all the playlists and crates you have in Mixxx 
+                            as playlists in Rekordbox
+                        </li>
+                        <li>Exporting everything to USB from Rekordbox</li>
+                    </ol>
+                    <p>
+                        This manual process can be very tedious if you have many playlists and crates organized in Mixxx.
+                    </p>
+                    <h3>The solution:</h3>
+                    <p>
+                        This program generates an XML file that Rekordbox can read directly. By importing this 
+                        XML into Rekordbox, all the playlists you have in Mixxx will be automatically created, 
+                        <strong>without needing to create them manually</strong>.
+                    </p>
+                </div>
+
+                <!-- System requirements -->
+                <div class="help-section">
+                    <h2>System requirements</h2>
+                    <h3>If you use Linux:</h3>
+                    <p>
+                        You will need access to Rekordbox, which is only available for Windows and macOS. 
+                        You have two options:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Physical Windows machine:</strong> A Windows computer where you can 
+                            install Rekordbox
+                        </li>
+                        <li>
+                            <strong>Windows virtual machine:</strong> A virtual machine running Windows 
+                            on your Linux system
+                        </li>
+                    </ul>
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> In both cases, Rekordbox must be able to access the music 
+                        files. This means you will need to:
+                        <ul style="margin-top: 10px;">
+                            <li>Copy the music to a location accessible to Rekordbox</li>
+                            <li>Make sure Rekordbox can find and analyze the files</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Path problem -->
+                <div class="help-section">
+                    <h2>The file path problem</h2>
+                    <p>
+                        One of the challenges when working between Linux and Windows is that file paths have 
+                        different formats. However, <strong>it is important to maintain the same directory 
+                        structure</strong> for the mapping to work correctly.
+                    </p>
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> The subdirectory structure must be identical in both 
+                        systems. Only the first part of the path (the prefix/base) changes. For example, if in Linux 
+                        you have <code>/home/user/Music/electronic/house/track1.mp3</code>, in Windows you should have 
+                        <code>D:\electronic\house\track1.mp3</code> (maintaining the <code>electronic/house/</code> structure).
+                    </div>
+                    <h3>Solution: Path mapping</h3>
+                    <p>
+                        This program allows you to specify the <strong>Original Base Path</strong> (the initial 
+                        part of the path in Linux) and the <strong>Destination Base Path</strong> (the equivalent 
+                        initial part in Windows). You only need to indicate the difference in the first part of the paths; 
+                        the program will automatically replace this base part while keeping the rest of the directory 
+                        structure intact.
+                    </p>
+                    <h3>Practical examples:</h3>
+                    
+                    <div class="info-box">
+                        <strong>Example 1 - Simple path:</strong><br>
+                        <strong>Original Base Path (Linux):</strong> <code>/home/user/Music/electronic</code><br>
+                        <strong>Destination Base Path (Windows):</strong> <code>D:\electronic</code><br><br>
+                        <strong>File in Linux:</strong> <code>/home/user/Music/electronic/house/track1.mp3</code><br>
+                        <strong>Will be converted to:</strong> <code>D:\electronic\house\track1.mp3</code><br><br>
+                        <em>Note: The <code>house/</code> structure remains the same in both systems.</em>
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Example 2 - Path with Windows user:</strong><br>
+                        <strong>Original Base Path (Linux):</strong> <code>/home/user/Music</code><br>
+                        <strong>Destination Base Path (Windows):</strong> <code>C:\Users\User\Music</code><br><br>
+                        <strong>File in Linux:</strong> <code>/home/user/Music/electronic/techno/set1.mp3</code><br>
+                        <strong>Will be converted to:</strong> <code>C:\Users\User\Music\electronic\techno\set1.mp3</code><br><br>
+                        <em>Note: The <code>electronic/techno/</code> structure remains the same.</em>
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Example 3 - External drive or network unit:</strong><br>
+                        <strong>Original Base Path (Linux):</strong> <code>/media/usb/Music</code><br>
+                        <strong>Destination Base Path (Windows):</strong> <code>E:\Music</code><br><br>
+                        <strong>File in Linux:</strong> <code>/media/usb/Music/playlists/party/track2.mp3</code><br>
+                        <strong>Will be converted to:</strong> <code>E:\Music\playlists\party\track2.mp3</code><br><br>
+                        <em>Note: The <code>playlists/party/</code> structure remains the same.</em>
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>💡 Tip:</strong> To correctly identify the base paths, take any file from your library 
+                        and compare the paths:<br><br>
+                        <strong>In Linux:</strong> <code>/home/user/Music/electronic/subfolder/file.mp3</code><br>
+                        <strong>In Windows:</strong> <code>D:\electronic\subfolder\file.mp3</code><br><br>
+                        The common part that changes is: <code>/home/user/Music</code> → <code>D:\</code><br>
+                        Therefore, you would use:<br>
+                        • <strong>Original Base Path:</strong> <code>/home/user/Music</code><br>
+                        • <strong>Destination Base Path:</strong> <code>D:\</code>
+                    </div>
+                </div>
+
+                <!-- How to use the program -->
+                <div class="help-section">
+                    <h2>How to use this program?</h2>
+                    <h3>Step 1: Prepare your Mixxx database</h3>
+                    <p>
+                        You need to locate the Mixxx database file. It is usually located at:
+                    </p>
+                    <div class="code-example">
+                        <strong>Linux:</strong> ~/.mixxx/mixxxdb.sqlite<br>
+                        <strong>Windows:</strong> %LOCALAPPDATA%\Mixxx\mixxxdb.sqlite<br>
+                        <strong>macOS:</strong> ~/Library/Application Support/Mixxx/mixxxdb.sqlite
+                    </div>
+                    <p>
+                        <strong>Note:</strong> Make sure to close Mixxx before copying the file to avoid locking issues.
+                    </p>
+
+                    <h3>Step 2: Configure the paths</h3>
+                    <p>
+                        In the application, complete the following fields:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Original Base Path (Linux):</strong> The base path where you have your music in 
+                            Linux. For example: <code>/home/user/Music/electronic</code>
+                        </li>
+                        <li>
+                            <strong>Destination Base Path (Windows):</strong> The base path where the files will be 
+                            located in Windows. For example: <code>D:\electronic</code> or <code>/D:/electronic</code>
+                        </li>
+                    </ul>
+                    <div class="info-box">
+                        <strong>💡 Tip:</strong> You only need to specify the common part of the path. The program 
+                        will automatically replace this base part in all file paths.
+                    </div>
+
+                    <h3>Step 3: Select what to include</h3>
+                    <p>
+                        You can choose which elements to include in the generated XML:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Include playlists:</strong> Check this option if you want to include your Mixxx 
+                            playlists
+                        </li>
+                        <li>
+                            <strong>Include crates:</strong> Check this option if you want to include your Mixxx 
+                            crates
+                        </li>
+                    </ul>
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> You must select <strong>at least one of the two options</strong> 
+                        (playlists or crates). The program will not allow generating an XML without any playlists, 
+                        as it would not make sense to create an empty file for Rekordbox. Both options are checked 
+                        by default, but you can uncheck one of them if you only need to import playlists or only crates.
+                    </div>
+
+                    <h3>Step 4: Generate the XML</h3>
+                    <ol>
+                        <li>Select the <code>mixxxdb.sqlite</code> file from Mixxx</li>
+                        <li>Complete the path fields</li>
+                        <li>Select which elements to include (playlists and/or crates)</li>
+                        <li>Click "Process and Generate XML"</li>
+                        <li>The XML file will be automatically downloaded</li>
+                    </ol>
+
+                    <h3>Step 5: Import into Rekordbox</h3>
+                    <p>
+                        Once you have the generated XML file, you need to import it into Rekordbox. There are two main 
+                        methods to do this:
+                    </p>
+                    
+                    <div class="warning-box" style="background: #f8d7da; border: 2px solid #dc3545; color: #721c24;">
+                        <strong>⚠️ IMPORTANT WARNING:</strong>
+                        <ul style="margin-top: 10px; margin-bottom: 0;">
+                            <li>
+                                When importing the XML file into Rekordbox, <strong>existing data in your Rekordbox library 
+                                may be overwritten</strong>, including playlists, metadata, or configurations you already have.
+                            </li>
+                            <li>
+                                <strong>It is strongly recommended to make a backup</strong> of your Rekordbox library before 
+                                importing the XML. You can do this by exporting your current library from Rekordbox 
+                                (File → Export → Export Collection) or by making a backup copy of Rekordbox files.
+                            </li>
+                            <li>
+                                If you have doubts about how to proceed, try importing the XML first in a test installation 
+                                of Rekordbox or in a different user profile.
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <h4>Method 1: Import through File menu (Recommended)</h4>
+                    <ol>
+                        <li>
+                            <strong>Open Rekordbox</strong> on Windows or macOS
+                        </li>
+                        <li>
+                            Go to the top menu and select <strong>File → Import → Playlist</strong> or 
+                            <strong>File → Import → Import Playlist File</strong>
+                        </li>
+                        <li>
+                            In the dialog box that appears, navigate to the location where you saved the generated XML 
+                            file (usually downloaded to your Downloads folder)
+                        </li>
+                        <li>
+                            Select the XML file (it should be named <code>rekordbox_export.xml</code> or similar)
+                        </li>
+                        <li>
+                            Click <strong>Open</strong> or <strong>Import</strong>
+                        </li>
+                        <li>
+                            Rekordbox will begin importing the playlists. You will see progress at the bottom of the window
+                        </li>
+                        <li>
+                            Once the import is complete, you will see all your playlists and crates in the left panel 
+                            of Rekordbox, under the "Playlists" section
+                        </li>
+                    </ol>
+
+                    <h4>Method 2: Configure as external XML library</h4>
+                    <p>
+                        This method is useful if you want to keep the XML as a separate library that Rekordbox can 
+                        read without directly importing:
+                    </p>
+                    <ol>
+                        <li>
+                            Open Rekordbox and go to <strong>File → Preferences</strong> (or <strong>Rekordbox → Preferences</strong> on macOS)
+                        </li>
+                        <li>
+                            In the preferences window, look for the <strong>Advanced</strong> or <strong>Database</strong> tab
+                        </li>
+                        <li>
+                            Find the <strong>"rekordbox xml"</strong> or <strong>"External Library"</strong> section
+                        </li>
+                        <li>
+                            Click the <strong>Browse</strong> or <strong>Select</strong> button next to "Library Path" or 
+                            "XML Library Path"
+                        </li>
+                        <li>
+                            Navigate and select the generated XML file
+                        </li>
+                        <li>
+                            Click <strong>OK</strong> to save the changes
+                        </li>
+                        <li>
+                            In the left panel of Rekordbox, look for the <strong>"rekordbox xml"</strong> or 
+                            <strong>"External Library"</strong> section
+                        </li>
+                        <li>
+                            Click the <strong>refresh</strong> icon (usually a circle with arrows) 
+                            next to the library name to load the content
+                        </li>
+                    </ol>
+
+                    <div class="info-box">
+                        <strong>💡 Note:</strong> Method 1 is more direct and recommended for most users, 
+                        as it imports the playlists directly into your main Rekordbox library. Method 2 is useful 
+                        if you prefer to keep the playlists as a separate external library.
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> 
+                        <ul style="margin-top: 10px;">
+                            <li>
+                                Make sure the music files are in the location specified in the 
+                                "Destination Base Path" <strong>before</strong> importing the XML into Rekordbox
+                            </li>
+                            <li>
+                                Rekordbox needs to be able to access the files to analyze them and generate waveforms
+                            </li>
+                            <li>
+                                If the files are not in the correct location, Rekordbox will show the playlists but the 
+                                tracks will appear as "missing files"
+                            </li>
+                            <li>
+                                After importing, let Rekordbox analyze all the files. This may take several minutes 
+                                depending on how much music you have
+                            </li>
+                            <li>
+                                Once Rekordbox finishes analyzing the files, you can export everything to your USB drive
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h4>Verification after import</h4>
+                    <p>
+                        After importing the XML, verify that everything was imported correctly:
+                    </p>
+                    <ul>
+                        <li>
+                            Check that all your playlists appear in the left panel of Rekordbox
+                        </li>
+                        <li>
+                            Open some playlists and verify that they contain the correct tracks
+                        </li>
+                        <li>
+                            Verify that tracks do not appear as "missing files"
+                        </li>
+                        <li>
+                            If you see missing files, verify that the paths in the XML match the actual paths 
+                            of your files in Windows
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Additional information -->
+                <div class="help-section">
+                    <h2>Additional information</h2>
+                    <h3>What information is transferred?</h3>
+                    <p>The generated XML includes:</p>
+                    <ul>
+                        <li><strong>Tracks:</strong> Information for all tracks in your library</li>
+                        <li><strong>Metadata:</strong> Artist, title, album, genre, BPM, musical key, etc.</li>
+                        <li><strong>Position Marks:</strong> Cues and hot cues you have configured in Mixxx</li>
+                        <li><strong>Playlists:</strong> All your playlists with their tracks</li>
+                        <li><strong>Crates:</strong> All your organizational crates</li>
+                        <li><strong>Colors:</strong> Color labels assigned to tracks</li>
+                        <li><strong>Ratings:</strong> Track ratings</li>
+                    </ul>
+
+                    <h3>Limitations</h3>
+                    <ul>
+                        <li>
+                            This program <strong>does NOT</strong> generate waveforms or analyze audio files. 
+                            That must be done by Rekordbox after importing the XML.
+                        </li>
+                        <li>
+                            Music files must be physically available at the specified location 
+                            for Rekordbox to analyze them.
+                        </li>
+                        <li>
+                            Some specific Mixxx features may not have a direct equivalent in 
+                            Rekordbox and may be lost in the conversion.
+                        </li>
+                    </ul>
+
+                    <h3>Tips</h3>
+                    <ul>
+                        <li>
+                            <strong>Make a backup</strong> of your Mixxx database before processing it
+                        </li>
+                        <li>
+                            <strong>Verify the paths</strong> before generating the XML to make sure they 
+                            match your configuration
+                        </li>
+                        <li>
+                            If you have many tracks, the process may take a few moments. Be patient and don't close 
+                            the page while it's processing
+                        </li>
+                        <li>
+                            After importing into Rekordbox, let it analyze all files before exporting 
+                            to USB to ensure all information is available
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Nomenclature -->
+                <div class="help-section">
+                    <h2>Playlist nomenclature</h2>
+                    <p>
+                        To facilitate identification, the program adds prefixes to playlist names:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>[P]</strong> at the beginning of the name indicates it is a <strong>Playlist</strong>
+                        </li>
+                        <li>
+                            <strong>[C]</strong> at the beginning of the name indicates it is a <strong>Crate</strong>
+                        </li>
+                    </ul>
+                    <p>
+                        For example, if you have a playlist called "House Mix" and a crate called "_intros", 
+                        they will appear as:
+                    </p>
+                    <div class="code-example">
+                        [P]House Mix<br>
+                        [C]_intros
+                    </div>
+                    <p>
+                        This will help you easily distinguish between playlists and crates when you see them in Rekordbox.
+                    </p>
+                </div>
+
+                <!-- Back -->
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="index.html" class="btn-primary" style="display: inline-block; text-decoration: none;">
+                        Back to application
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Convert your Mixxx library to Rekordbox format</p>
+            <p style="margin-top: 10px; font-size: 0.85em; color: #6c757d;">
+                Author: Leo Combes | 
+                <a href="LICENSE" style="color: #6c757d; text-decoration: none;">GPL-3.0</a> | 
+                Inspired by: <a href="https://github.com/FrankwaP/mixxx-utils" target="_blank" style="color: #6c757d; text-decoration: none;">mixxx-utils</a>, 
+                <a href="https://github.com/TheKantankerus/MixxxToRekordbox" target="_blank" style="color: #6c757d; text-decoration: none;">MixxxToRekordbox</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
+

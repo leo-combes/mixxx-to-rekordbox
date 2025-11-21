@@ -1,0 +1,34 @@
+# Base de datos SQLite (no subir bases de datos de usuarios)
+*.sqlite
+*.db
+
+# Archivos de salida generados
+output.xml
+*.xml
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Archivos de Python (si los hay)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Archivos de editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+

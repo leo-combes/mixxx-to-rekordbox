@@ -32,3 +32,9 @@ venv/
 *.sublime-project
 *.sublime-workspace
 
+# Tokens y credenciales
+.github_token
+token.txt
+*.token
+credentials.txt
+

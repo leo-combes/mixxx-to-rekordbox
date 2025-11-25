@@ -6,11 +6,10 @@ let SQL = null;
 async function initSQL() {
     try {
         if (window.initSqlJs) {
-            SQL = await window.initSqlJs({
-                locateFile: file => file
-            });
+            // sql-asm.js no requiere locateFile ya que no usa archivos WASM externos
+            SQL = await window.initSqlJs();
         } else {
-            console.error('initSqlJs no está disponible. Verifica que sql-wasm.js se haya cargado correctamente.');
+            console.error('initSqlJs no está disponible. Verifica que sql-asm.js se haya cargado correctamente.');
         }
     } catch (error) {
         console.error('Error al inicializar SQL.js:', error);
@@ -43,16 +42,33 @@ function calculateBeatPosition(blobData, sampleRate, bpm) {
     }
 }
 
+// Función para normalizar rutas (convertir barras invertidas a barras normales)
+function normalizePath(path) {
+    if (!path) return path;
+    // Convertir todas las barras invertidas a barras normales
+    return path.replace(/\\/g, '/');
+}
+
 // Función para convertir path de Linux a Windows
 function convertPath(originalLocation, oldBase, newBase) {
     if (originalLocation.startsWith("file://localhost//")) {
         // Quitar el prefijo file://localhost//
         const linuxPath = originalLocation.substring(17);
         
+        // Normalizar las rutas base para comparación
+        const normalizedOldBase = normalizePath(oldBase);
+        const normalizedNewBase = normalizePath(newBase);
+        
         // Remapear la carpeta base
-        if (linuxPath.startsWith(oldBase)) {
-            const windowsPath = linuxPath.replace(oldBase, newBase);
-            return `file://localhost${windowsPath}`;
+        if (linuxPath.startsWith(normalizedOldBase)) {
+            const windowsPath = linuxPath.replace(normalizedOldBase, normalizedNewBase);
+            // Normalizar la ruta de Windows y asegurar que tenga barra después de localhost
+            const normalizedWindowsPath = normalizePath(windowsPath);
+            // Asegurar que comience con / después de localhost
+            const finalPath = normalizedWindowsPath.startsWith('/') 
+                ? normalizedWindowsPath 
+                : '/' + normalizedWindowsPath;
+            return `file://localhost${finalPath}`;
         } else {
             return originalLocation;
         }
@@ -508,8 +524,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Procesar cuando se hace clic en el botón
     processBtn.addEventListener('click', async () => {
         const dbFile = dbFileInput.files[0];
-        const oldBase = oldBaseInput.value.trim();
-        const newBase = newBaseInput.value.trim();
+        // Normalizar las rutas de entrada (aceptar tanto / como \)
+        const oldBase = normalizePath(oldBaseInput.value.trim());
+        const newBase = normalizePath(newBaseInput.value.trim());
         const includePlaylists = includePlaylistsCheckbox.checked;
         const includeCrates = includeCratesCheckbox.checked;
         

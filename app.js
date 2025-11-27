@@ -1,70 +1,135 @@
-// Variables globales
+// Global variables
 let db = null;
 let SQL = null;
 
-// Inicializar sql.js
+// Initialize sql.js
 async function initSQL() {
     try {
         if (window.initSqlJs) {
-            // sql-asm.js no requiere locateFile ya que no usa archivos WASM externos
             SQL = await window.initSqlJs();
         } else {
-            console.error('initSqlJs no está disponible. Verifica que sql-asm.js se haya cargado correctamente.');
+            console.error('initSqlJs is not available. Verify that sql-asm.js has been loaded correctly.');
         }
     } catch (error) {
-        console.error('Error al inicializar SQL.js:', error);
+        console.error('Error initializing SQL.js:', error);
     }
 }
 
-// Función para calcular la posición del beat en segundos desde el blob de beats
-// Nota: Esta es una aproximación simplificada. Para una implementación completa
-// necesitarías el schema de protobuf de Mixxx (beats_pb2.BeatGrid)
-function calculateBeatPosition(blobData, sampleRate, bpm) {
+// Global variable to store the BeatGrid class once loaded
+let BeatGridMessage = null;
+
+// Async function to load the schema (must be executed when the page loads)
+async function loadProtobufSchema() {
     try {
-        if (!blobData || !sampleRate || !bpm) return null;
+        // Use protobuf.js to load the schema defined above
+        const root = await protobuf.load("data:text/plain;base64," + btoa(`
+            syntax = "proto2";
+            package beats;
+
+            message Beat {
+              optional int32 frame_position = 1;
+              optional bool enabled = 2 [default = true];
+              optional Source source = 3 [default = ANALYZER];
+            }
+
+            message Bpm {
+              optional double bpm = 1;
+              optional Source source = 2 [default = ANALYZER];
+            }
+
+            message BeatMap {
+              repeated Beat beat = 1;
+            }
+
+            message BeatGrid {
+              optional Bpm bpm = 1;
+              optional Beat first_beat = 2;
+            }
+
+            enum Source {
+              ANALYZER = 0;
+              FILE_METADATA = 1;
+              USER = 2;
+            }
+        `));
         
-        // El blob contiene un protobuf serializado de BeatGrid
-        // Intentamos leer los valores directamente desde los bytes
-        // Esto es una aproximación y puede no funcionar para todos los casos
+        // Get the definition of the specific message we need
+        BeatGridMessage = root.lookupType("beats.BeatGrid");
+        console.log("BeatGrid schema loaded successfully.");
         
-        const dataView = new DataView(blobData);
-        
-        // Buscar el frame_position en el protobuf
-        // Los protobufs almacenan campos con tags, necesitamos buscar el campo correcto
-        // Por ahora, usamos un valor por defecto de 0.0
-        // En producción, necesitarías usar protobuf.js con el schema de Mixxx
-        
-        // Valor por defecto: inicio del primer beat
-        return 0.0;
     } catch (error) {
-        console.warn('Error al calcular beat position:', error);
+        console.error("Error loading Protobuf schema:", error);
+    }
+}
+
+// Call this function when the page loads to prepare the schema
+loadProtobufSchema();
+
+
+// --- Main calculation function ---
+function calculateBeatPosition(blobData, sampleRate) {
+    if (!BeatGridMessage) {
+        console.error("Protobuf schema is not yet loaded.");
+        return null;
+    }
+
+    try {
+        if (!blobData || !sampleRate) return null;
+        
+        const byteArray = new Uint8Array(blobData);
+
+        // Use the dynamically loaded BeatGridMessage class
+        const beatGrid = BeatGridMessage.decode(byteArray);
+
+        if (beatGrid.firstBeat && typeof beatGrid.firstBeat.framePosition !== 'undefined' && beatGrid.bpm && typeof beatGrid.bpm.bpm !== 'undefined') {
+            
+            const framePosition = beatGrid.firstBeat.framePosition;
+            const beatLength = 60.0 / beatGrid.bpm.bpm; 
+            let positionSeconds = framePosition / sampleRate;
+
+            // Position adjustment logic
+            if (positionSeconds < 0) {
+                positionSeconds += beatLength;
+            }
+            if (positionSeconds > beatLength) {
+                positionSeconds -= beatLength;
+            }
+            return positionSeconds;
+
+        } else {
+            console.warn('Protobuf did not contain the required first_beat or bpm fields.');
+            return null;
+        }
+
+    } catch (error) {
+        console.error('Error calculating beat position:', error);
         return null;
     }
 }
 
-// Función para normalizar rutas (convertir barras invertidas a barras normales)
+// Function to normalize paths (convert backslashes to forward slashes)
 function normalizePath(path) {
     if (!path) return path;
-    // Convertir todas las barras invertidas a barras normales
+    // Convert all backslashes to forward slashes
     return path.replace(/\\/g, '/');
 }
 
-// Función para convertir path de Linux a Windows
+// Function to convert path from Linux to Windows
 function convertPath(originalLocation, oldBase, newBase) {
     if (originalLocation.startsWith("file://localhost//")) {
-        // Quitar el prefijo file://localhost//
+        // Remove the file://localhost// prefix
         const linuxPath = originalLocation.substring(17);
         
-        // Normalizar las rutas base para comparación
+        // Normalize base paths for comparison
         const normalizedOldBase = normalizePath(oldBase);
         const normalizedNewBase = normalizePath(newBase);
         
-        // Remapear la carpeta base
+        // Remap the base folder
         if (linuxPath.startsWith(normalizedOldBase)) {
             const windowsPath = linuxPath.replace(normalizedOldBase, normalizedNewBase);
-            // Normalizar la ruta de Windows y asegurar que tenga barra después de localhost
+            // Normalize Windows path and ensure it has a slash after localhost
             const normalizedWindowsPath = normalizePath(windowsPath);
-            // Asegurar que comience con / después de localhost
+            // Ensure it starts with / after localhost
             const finalPath = normalizedWindowsPath.startsWith('/') 
                 ? normalizedWindowsPath 
                 : '/' + normalizedWindowsPath;
@@ -76,7 +141,7 @@ function convertPath(originalLocation, oldBase, newBase) {
     return originalLocation;
 }
 
-// Función para escapar XML
+// Function to escape XML
 function escapeXml(unsafe) {
     if (unsafe === null || unsafe === undefined) return '';
     return String(unsafe)
@@ -87,7 +152,7 @@ function escapeXml(unsafe) {
         .replace(/'/g, "&apos;");
 }
 
-// Función para obtener el color hexadecimal
+// Function to get hexadecimal color
 function getHexColor(color) {
     if (!color) return '';
     
@@ -104,7 +169,7 @@ function getHexColor(color) {
     return colorMap[color] || '';
 }
 
-// Función para obtener el nombre del color
+// Function to get color name
 function getColorName(color) {
     if (!color) return '';
     
@@ -121,7 +186,7 @@ function getColorName(color) {
     return colorMap[color] || '';
 }
 
-// Función para obtener el rating
+// Function to get rating
 function getRating(rating) {
     const ratingMap = {
         0: 0,
@@ -136,21 +201,21 @@ function getRating(rating) {
     return ratingMap[rating] || 0;
 }
 
-// Función para obtener el tipo de archivo
+// Function to get file type
 function getFileType(filetype) {
     if (filetype === 'm4a') return 'M4A File';
     if (filetype === 'mp3') return 'MP3 File';
     return filetype || '';
 }
 
-// Función para generar el XML
+// Function to generate XML
 function generateXML(tracks, positionMarks, playlists, oldBase, newBase) {
     let xml = '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n';
     xml += '<DJ_PLAYLISTS Version="1.0.0">\n';
     xml += '  <PRODUCT Name="rekordbox" Version="6.7.7" Company="AlphaTheta"/>\n';
     xml += `  <COLLECTION Entries="${tracks.length}">\n`;
     
-    // Generar tracks
+    // Generate tracks
     tracks.forEach(track => {
         const location = convertPath(track.Location, oldBase, newBase);
         const hexColor2 = getHexColor(track.color);
@@ -186,45 +251,73 @@ function generateXML(tracks, positionMarks, playlists, oldBase, newBase) {
         
         // TEMPO element
         if (track.AverageBpm && track.SampleRate) {
-            // Intentar calcular la posición del beat desde el blob
+            // Try to calculate beat position from blob
             let beatPosition = null;
             if (track.beats && track.beats.length > 0) {
-                // Convertir ArrayBuffer/Uint8Array a formato usable
+                // Convert ArrayBuffer/Uint8Array to usable format
                 const beatsData = track.beats instanceof Uint8Array ? track.beats : new Uint8Array(track.beats);
-                beatPosition = calculateBeatPosition(beatsData.buffer, track.SampleRate, track.AverageBpm);
+                if(track.beats_version == 'BeatGrid-2.0'){
+                    beatPosition = calculateBeatPosition(beatsData.buffer, track.SampleRate, track.AverageBpm);
+                }
+                // track.beats_version == 'BeatMap-1.0'
+                else{   // not implemented YET
+                    beatPosition = null;
+                }
             }
             
-            // Usar posición calculada o valor por defecto
+            // Use calculated position or default value
             const inizio = beatPosition !== null ? beatPosition.toFixed(3) : "0.000";
             xml += `      <TEMPO Inizio="${inizio}" Bpm="${escapeXml(track.AverageBpm)}" Metro="4/4" Battito="1"/>\n`;
         }
-        
-        // POSITION_MARK elements
+
         if (positionMarks[track.TrackID]) {
             positionMarks[track.TrackID].forEach(pm => {
                 xml += `      <POSITION_MARK `;
                 xml += `Name="${escapeXml(pm.Name)}" `;
-                xml += `Type="${escapeXml(pm.Type)}" `;
-                xml += `Start="${escapeXml(pm.Start)}" `;
-                xml += `Num="${escapeXml(pm.Num)}" `;
-                xml += `Red="${escapeXml(pm.Red)}" `;
-                xml += `Green="${escapeXml(pm.Green)}" `;
-                xml += `Blue="${escapeXml(pm.Blue)}"`;
+
+                if(pm.internalType == 'hotcue'){
+
+                    // CASE 1
+                    if(pm.Type == 1){   // hotcue
+                        xml += `Type="0" `;
+                        xml += `Start="${escapeXml(pm.Start)}" `;
+                        xml += `Num="${escapeXml(pm.Num)}" `;
+                        xml += `Red="${escapeXml(pm.Red)}" `;
+                        xml += `Green="${escapeXml(pm.Green)}" `;
+                        xml += `Blue="${escapeXml(pm.Blue)}"`;
+                    }
+                    // CASE 2
+                    else if(pm.Type == 4){   // loop
+                        xml += `Type="4" `;
+                        xml += `Start="${escapeXml(pm.Start)}" `;                        
+                        // here we actually have the loop duration in seconds
+                        // convert it to loop end position in seconds
+                        const endPosition = parseFloat(pm.Start) + parseFloat(pm.Stop);
+                        xml += `End="${escapeXml(endPosition.toFixed(3))}" `;
+                        xml += `Num="-1"`;
+                    }
+                }
+                else if(pm.internalType == 'cuepoint'){
+                    // CASE 3
+                    xml += `Type="0" `;
+                    xml += `Start="${escapeXml(pm.Start)}" `;
+                    xml += `Num="-1"`;
+                }
                 xml += '/>\n';
             });
-        }
+        }        
         
         xml += '    </TRACK>\n';
     });
     
     xml += '  </COLLECTION>\n';
     
-    // Solo incluir PLAYLISTS si hay playlists
+    // Only include PLAYLISTS if there are playlists
     if (Object.keys(playlists).length > 0) {
         xml += '  <PLAYLISTS>\n';
         xml += `    <NODE Name="ROOT" Type="0" Count="${Object.keys(playlists).length}">\n`;
         
-        // Generar playlists ordenadas por nombre
+        // Generate playlists sorted by name
         Object.entries(playlists)
             .sort(([, a], [, b]) => {
                 const nameA = (a.Name || '').toLowerCase();
@@ -247,7 +340,7 @@ function generateXML(tracks, positionMarks, playlists, oldBase, newBase) {
     return xml;
 }
 
-// Función para procesar la base de datos
+// Function to process the database
 async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true, includeCrates = true) {
     try {
         updateStatus(t('readingDb'), 'info');
@@ -268,7 +361,7 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
     updateStatus(t('executingQueries'), 'info');
     updateProgress(30);
     
-    // Query principal de tracks
+    // Main tracks query
     const tracksQuery = `
         SELECT
             T0.id as TrackID,
@@ -300,7 +393,8 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
                 ELSE 0 
             END as Rating,
             T0.color,
-            T0.beats
+            T0.beats,
+            T0.beats_version
         FROM library T0
         INNER JOIN track_locations T1 ON T0.id = T1.id
         WHERE T0.mixxx_deleted = 0
@@ -310,9 +404,9 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
     const tracks = tracksResult[0] ? tracksResult[0].values.map(row => {
         const obj = {};
         tracksResult[0].columns.forEach((col, idx) => {
-            // Manejar blobs (beats) correctamente
+            // Handle blobs (beats) correctly
             if (col === 'beats' && row[idx] !== null) {
-                // Convertir blob a Uint8Array si es necesario
+                // Convert blob to Uint8Array if necessary
                 if (row[idx] instanceof Uint8Array) {
                     obj[col] = row[idx];
                 } else if (row[idx] instanceof ArrayBuffer) {
@@ -330,20 +424,74 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
     updateStatus(t('tracksFound', { count: tracks.length }), 'info');
     updateProgress(50);
     
-    // Query de position marks
+    // === CASE 1: first query, table "cues" type = 1 (hotcue)
+    //  in Mixxx:
+    //      label = name
+    //      type = 1 (is hotcue)
+    //      position = position expressed in samples
+    //      length = 0 (has no length)
+    //  in rekordbox:
+    //      "Name" = name
+    //      "Type" = "0"
+    //      "Start" = track start time in seconds
+    //      "Num" = consecutive number "1", "2", "3", etc.
+    //      "Red", "Green", "Blue" = hotcue colors
+    //
+    // === CASE 2: first query, table "cues" type = 4 (loop)
+    //  in Mixxx:
+    //      type = 4 (is loop)
+    //      position = position expressed in samples
+    //      length = length expressed in samples
+    //  in rekordbox:
+    //      "Name" = loops don't have names (we always name it "")
+    //      "Type" = "4"
+    //      "Start" = loop start time in seconds
+    //      "End" = loop end time in seconds
+    //      "Num" = always "-1"
+    //
+    // === CASE 3: second query, table "library", adds the default CUE in Mixxx as memory cue in Rekordbox
+    //  in Mixxx:
+    //      cuepoint = position expressed in samples
+    //  in rekordbox:
+    //      "Name" = we always set it to "Cuepoint"
+    //      "Type" = "0"
+    //      "Start" = track start time in seconds
+    //      "Num" = always "-1"
+    //
+    // Fields not specified in Rekordbox are not used (e.g., loop or default cue don't have colors)
+
     const positionMarksQuery = `
         SELECT 
             T0.track_id as TrackID, 
             T0.label as Name,
-            0 as Type, 
-            ROUND(T0.position / (2.0 * T1.samplerate), 3) as Start, 
+            T0.Type as Type,
+            'hotcue' as internalType,
+            ROUND(T0.position / (2.0 * T1.samplerate), 3) as Start,
+            ROUND(T0.length / (2.0 * T1.samplerate), 3) as Stop,
             T0.hotcue as Num,
             ((T0.color >> 16) & 255) AS Red,
             ((T0.color >> 8) & 255) AS Green,
             (T0.color & 255) AS Blue
         FROM cues T0 
         INNER JOIN library T1 ON T0.track_id = T1.id
-        WHERE T0.type = 1 AND T1.mixxx_deleted = 0
+        WHERE T0.type IN (1, 4) AND T1.mixxx_deleted = 0
+
+        UNION ALL
+
+        -- Second query to add CUEPOINT (Type="0" Num="-1")
+        SELECT
+            T1_cp.id AS TrackID,
+            'Cuepoint' AS Name,           -- Fixed name for cuepoint
+            0 AS Type,
+            'cuepoint' as internalType,
+            ROUND(T1_cp.cuepoint / (2.0 * T1_cp.samplerate), 3) AS Start,
+            0 AS Stop,
+            "-1" AS Num,
+            0 AS Red,
+            0 AS Green,
+            0 AS Blue
+        FROM library T1_cp
+        WHERE T1_cp.mixxx_deleted = 0 AND T1_cp.cuepoint IS NOT NULL AND T1_cp.cuepoint > 0
     `;
     
     const positionMarksResult = db.exec(positionMarksQuery);
@@ -355,7 +503,7 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
         return obj;
     }) : [];
     
-    // Agrupar position marks por TrackID
+    // Group position marks by TrackID
     const positionMarks = {};
     positionMarksData.forEach(pm => {
         if (!positionMarks[pm.TrackID]) {
@@ -367,7 +515,7 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
     updateStatus(t('positionMarksFound', { count: positionMarksData.length }), 'info');
     updateProgress(70);
     
-    // Construir query de playlists y crates según las opciones seleccionadas
+    // Build playlists and crates query according to selected options
     let playlistsQueryParts = [];
     
     if (includePlaylists) {
@@ -408,7 +556,7 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
         return obj;
     }) : [];
     
-    // Agrupar playlists
+    // Group playlists
     const playlists = {};
     playlistsData.forEach(item => {
         if (!playlists[item.id]) {
@@ -420,20 +568,20 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
     updateStatus(t('playlistsFound', { count: Object.keys(playlists).length }), 'info');
     updateProgress(85);
     
-    // Generar XML
+    // Generate XML
     updateStatus(t('generatingXml'), 'info');
     const xml = generateXML(tracks, positionMarks, playlists, oldBase, newBase);
     
         updateProgress(100);
         updateStatus(t('xmlGenerated'), 'success');
         
-        // Descargar archivo
+        // Download file
         downloadXML(xml);
     } catch (error) {
-        console.error('Error procesando base de datos:', error);
+        console.error('Error processing database:', error);
         throw error;
     } finally {
-        // Limpiar la base de datos de memoria
+        // Clean up in-memory database
         if (db) {
             db.close();
             db = null;
@@ -441,7 +589,7 @@ async function processDatabase(dbFile, oldBase, newBase, includePlaylists = true
     }
 }
 
-// Función para descargar el XML
+// Function to download XML
 function downloadXML(xml) {
     const blob = new Blob([xml], { type: 'application/xml' });
     const url = URL.createObjectURL(blob);
@@ -454,7 +602,7 @@ function downloadXML(xml) {
     URL.revokeObjectURL(url);
 }
 
-// Función para actualizar el estado
+// Function to update status
 function updateStatus(message, type = 'info') {
     const statusEl = document.getElementById('status');
     statusEl.textContent = message;
@@ -462,7 +610,7 @@ function updateStatus(message, type = 'info') {
     statusEl.classList.remove('hidden');
 }
 
-// Función para actualizar el progreso
+// Function to update progress
 function updateProgress(percent) {
     const progressEl = document.getElementById('progress');
     const progressFillEl = document.getElementById('progressFill');
@@ -484,11 +632,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const includeCratesCheckbox = document.getElementById('includeCrates');
     const processBtn = document.getElementById('processBtn');
     
-    // Función para prevenir que ambos checkboxes estén deseleccionados
+    // Function to prevent both checkboxes from being unchecked
     function preventBothUnchecked(checkbox, otherCheckbox) {
         checkbox.addEventListener('change', () => {
             if (!checkbox.checked && !otherCheckbox.checked) {
-                // Si intentan deseleccionar y el otro ya está deseleccionado, volver a seleccionar
+                // If they try to uncheck and the other is already unchecked, re-check
                 checkbox.checked = true;
                 updateStatus(t('errorNoOptions'), 'error');
                 setTimeout(() => {
@@ -501,11 +649,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // Aplicar la validación a ambos checkboxes
+    // Apply validation to both checkboxes
     preventBothUnchecked(includePlaylistsCheckbox, includeCratesCheckbox);
     preventBothUnchecked(includeCratesCheckbox, includePlaylistsCheckbox);
     
-    // Mostrar nombre del archivo seleccionado y habilitar botón
+    // Show selected file name and enable button
     const fileNameSpan = document.getElementById('fileName');
     dbFileInput.addEventListener('change', () => {
         if (dbFileInput.files.length > 0) {
@@ -521,10 +669,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    // Procesar cuando se hace clic en el botón
+    // Process when button is clicked
     processBtn.addEventListener('click', async () => {
         const dbFile = dbFileInput.files[0];
-        // Normalizar las rutas de entrada (aceptar tanto / como \)
+        // Normalize input paths (accept both / and \)
         const oldBase = normalizePath(oldBaseInput.value.trim());
         const newBase = normalizePath(newBaseInput.value.trim());
         const includePlaylists = includePlaylistsCheckbox.checked;
@@ -563,7 +711,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    // Listener para el selector de idioma
+    // Listener for language selector
     const languageSelect = document.getElementById('language');
     if (languageSelect) {
         const savedLang = localStorage.getItem('language') || 'es';
